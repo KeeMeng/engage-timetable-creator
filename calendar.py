@@ -33,6 +33,7 @@ END:VTIMEZONE
 staff = {
 	"name": "link"
 }
+#removed for privacy reasons
 
 #loop for Week A and B
 for f in files:
@@ -48,7 +49,7 @@ for f in files:
 		lines += f"""
 BEGIN:VEVENT
 DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T{assembly.group(1)}{assembly.group(2)}00
-RRULE:FREQ=WEEKLY;INTERVAL=2
+RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=20210701T000000Z
 DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T{assembly.group(3)}{assembly.group(4)}00
 SUMMARY:Assembly / Tutorial
 BEGIN:VALARM
@@ -57,13 +58,33 @@ DESCRIPTION:Assembly / Tutorial
 TRIGGER:-PT5M
 END:VALARM
 END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T095500
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL=20210701T000000Z
+DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T101000
+SUMMARY:Break
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T115500
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL=20210701T000000Z
+DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T122000
+SUMMARY:Break
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T140500
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL=20210701T000000Z
+DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T153000
+SUMMARY:Break
+END:VEVENT
 """
 
 		#finding all other lessons
 		regex = "<span class=[\'\"]ttLessonText[\'\"]>(<strong>Lesson \d<\/strong><br ?\/?>)?(.*?)<br ?\/?>(\d\d):(\d\d) - (\d\d):(\d\d)<br ?\/?>(.*?)<br ?\/?>(.*?)(<br ?\/?>)?<\/span>"
 		for (_, lesson, start_hour, start_min, end_hour, end_min, location, teacher, _) in re.findall(regex, html):
 			# print([lesson, start_hour, start_min, end_hour, end_min, location, teacher])
-
 			#increase date
 			if start_hour == "08":
 				date = datetime.datetime(int(year),int(month),int(day)) 
@@ -72,22 +93,55 @@ END:VEVENT
 				month = f"{date.month:02d}"
 				year = f"{date.year:02d}"
 
+# 				# Break 1
+# 				lines += f"""
+# BEGIN:VEVENT
+# DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T095500
+# RRULE:FREQ=WEEKLY;INTERVAL=2
+# DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T101000
+# SUMMARY:Break
+# END:VEVENT
+# """
+# 				# Break 2
+# 				lines += f"""
+# BEGIN:VEVENT
+# DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T115500
+# RRULE:FREQ=WEEKLY;INTERVAL=2
+# DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T122000
+# SUMMARY:Break
+# END:VEVENT
+# """
+	
+# 				# Break 3
+# 				lines += f"""
+# BEGIN:VEVENT
+# DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T140500
+# RRULE:FREQ=WEEKLY;INTERVAL=2
+# DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T153000
+# SUMMARY:Break
+# END:VEVENT
+# """
+
+
 
 			first_last_name = re.search("(Mr|Mrs|Ms) (.*?)$", teacher)
 			try:
 				zoom_link = staff[first_last_name.group(2)]
 			except KeyError:
-				teachers = re.findall("(Mr|Mrs|Ms) (.*?)((<br ?\/?>)|$)", teacher)
+				teachers = re.findall("(Mr|Mrs|Ms) (.*?)((<br ?\/?>)| &amp;|$)", teacher)
 				teacher = ""
 				for (title, name, _, _) in teachers:
 					teacher += f"{title} {name}, "
 				teacher = teacher[:-2]
 				zoom_link = ""
+			except AttributeError:
+				teacher = ""
+				zoom_link = ""
 
 			lines += f"""
 BEGIN:VEVENT
 DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T{start_hour}{start_min}00
-RRULE:FREQ=WEEKLY;INTERVAL=2
+RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=20210701T000000Z
 DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T{end_hour}{end_min}00
 SUMMARY:{lesson}
 URL:{zoom_link}
