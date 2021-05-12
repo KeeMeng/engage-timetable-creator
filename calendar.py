@@ -4,6 +4,12 @@ from tkinter import messagebox
 from os.path import dirname, join
 from tkinter.filedialog import askopenfilename
 
+add_initials = True
+
+#ends calendar on this day below
+#last day     YYYY/MM/DD
+school_end = "2021/07/01".replace("/","")
+
 messagebox.showinfo("Timetable Creator", "Select Week A first, and then Week B HTML File: ")
 
 #GUI input Week A and Week B html files
@@ -49,7 +55,7 @@ for f in files:
 		lines += f"""
 BEGIN:VEVENT
 DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T{assembly.group(1)}{assembly.group(2)}00
-RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=20210701T000000Z
+RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL={school_end}T000000Z
 DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T{assembly.group(3)}{assembly.group(4)}00
 SUMMARY:Assembly / Tutorial
 BEGIN:VALARM
@@ -61,21 +67,21 @@ END:VEVENT
 
 BEGIN:VEVENT
 DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T095500
-RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL=20210701T000000Z
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL={school_end}T000000Z
 DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T101000
 SUMMARY:Break
 END:VEVENT
 
 BEGIN:VEVENT
 DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T115500
-RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL=20210701T000000Z
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL={school_end}T000000Z
 DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T122000
 SUMMARY:Break
 END:VEVENT
 
 BEGIN:VEVENT
 DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T140500
-RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL=20210701T000000Z
+RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL={school_end}T000000Z
 DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T153000
 SUMMARY:Break
 END:VEVENT
@@ -115,6 +121,10 @@ END:VEVENT
 			first_last_name = re.search("(Mr|Mrs|Ms) (.*?)$", teacher)
 			try:
 				zoom_link = staff[first_last_name.group(2)]
+				if add_initials:
+					initials = f" ({''.join([word[0] for word in first_last_name.group(2).split(' ')]).upper()})"
+				else:
+					initials = ""
 			except KeyError:
 				teachers = re.findall("(Mr|Mrs|Ms) (.*?)((<br ?\/?>)| &amp;|$)", teacher)
 				teacher = ""
@@ -122,16 +132,17 @@ END:VEVENT
 					teacher += f"{title} {name}, "
 				teacher = teacher[:-2]
 				zoom_link = ""
+				initials = ""
 			except AttributeError:
 				teacher = ""
 				zoom_link = ""
-
+				initials = ""
 			lines += f"""
 BEGIN:VEVENT
 DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T{start_hour}{start_min}00
-RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=20210701T000000Z
+RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL={school_end}T000000Z
 DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T{end_hour}{end_min}00
-SUMMARY:{lesson}
+SUMMARY:{lesson}{initials}
 URL:{zoom_link}
 DESCRIPTION:{teacher}
 LOCATION:{location}
