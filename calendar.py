@@ -82,8 +82,27 @@ END:VEVENT
 """
 
 		#finding all other lessons
+		data = []
 		regex = "<span class=[\'\"]ttLessonText[\'\"]>(<strong>Lesson \d<\/strong><br ?\/?>)?(.*?)<br ?\/?>(\d\d):(\d\d) - (\d\d):(\d\d)<br ?\/?>(.*?)<br ?\/?>(.*?)(<br ?\/?>)?<\/span>"
 		for (_, lesson, start_hour, start_min, end_hour, end_min, location, teacher, _) in re.findall(regex, html):
+			data.append((lesson, start_hour, start_min, end_hour, end_min, location, teacher))
+
+		data.append((None, None, None, None, None, None, None))
+
+		count = 0
+		skip = False
+		while count < len(data)-1:
+			if skip:
+				skip = False
+				count += 1
+				continue
+			(lesson, start_hour, start_min, end_hour, end_min, location, teacher) = data[count]
+			(lesson2, _, _, end_hour2, end_min2, _, teacher2) = data[count+1]
+			if teacher != None and teacher == teacher2 and lesson == lesson2:
+				end_hour = end_hour2
+				end_min = end_min2
+				skip = True
+
 			# print([lesson, start_hour, start_min, end_hour, end_min, location, teacher])
 			#increase date
 			if start_hour == "08":
@@ -92,37 +111,6 @@ END:VEVENT
 				day = f"{date.day:02d}"
 				month = f"{date.month:02d}"
 				year = f"{date.year:02d}"
-
-# 				# Break 1
-# 				lines += f"""
-# BEGIN:VEVENT
-# DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T095500
-# RRULE:FREQ=WEEKLY;INTERVAL=2
-# DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T101000
-# SUMMARY:Break
-# END:VEVENT
-# """
-# 				# Break 2
-# 				lines += f"""
-# BEGIN:VEVENT
-# DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T115500
-# RRULE:FREQ=WEEKLY;INTERVAL=2
-# DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T122000
-# SUMMARY:Break
-# END:VEVENT
-# """
-	
-# 				# Break 3
-# 				lines += f"""
-# BEGIN:VEVENT
-# DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T140500
-# RRULE:FREQ=WEEKLY;INTERVAL=2
-# DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T153000
-# SUMMARY:Break
-# END:VEVENT
-# """
-
-
 
 			first_last_name = re.search("(Mr|Mrs|Ms) (.*?)$", teacher)
 			try:
@@ -154,6 +142,7 @@ TRIGGER:-PT5M
 END:VALARM
 END:VEVENT
 """
+			count += 1
 
 
 #creates ics file
