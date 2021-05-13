@@ -64,27 +64,6 @@ DESCRIPTION:Assembly / Tutorial
 TRIGGER:-PT5M
 END:VALARM
 END:VEVENT
-
-BEGIN:VEVENT
-DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T095500
-RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL={school_end}T000000Z
-DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T101000
-SUMMARY:Break
-END:VEVENT
-
-BEGIN:VEVENT
-DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T115500
-RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL={school_end}T000000Z
-DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T122000
-SUMMARY:Break
-END:VEVENT
-
-BEGIN:VEVENT
-DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T140500
-RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU,WE,TH,FR;UNTIL={school_end}T000000Z
-DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T153000
-SUMMARY:Break
-END:VEVENT
 """
 
 		#finding all other lessons
@@ -103,8 +82,43 @@ END:VEVENT
 				count += 1
 				continue
 			(lesson, start_hour, start_min, end_hour, end_min, location, teacher) = data[count]
-			(lesson2, _, _, end_hour2, end_min2, _, teacher2) = data[count+1]
-			if teacher != None and teacher == teacher2 and lesson == lesson2:
+			(lesson2, start_hour2, start_min2, end_hour2, end_min2, _, teacher2) = data[count+1]
+
+			if lesson2 != None:
+				time_diff = (int(start_hour2) * 60 + int(start_min2)) - (int(end_hour) * 60 + int(end_min)) 
+				if time_diff > 5 and time_diff < 180:
+					# print(time_diff)
+					# diff_hour = time_diff // 60
+					# diff_min = time_diff - (diff_hour * 60)
+					break_start_hour = int(end_hour)
+					break_start_min = int(end_min) + 5
+					if break_start_min > 60:
+						break_start_min -= 60
+						break_start_hour += 1
+
+					break_end_hour = int(start_hour2)
+					break_end_min = int(start_min2) - 5
+					if break_end_min > 60:
+						break_end_min -= 60
+						break_end_hour += 1
+					break_start_hour = f"{break_start_hour:02d}"
+					break_start_min = f"{break_start_min:02d}"
+					break_end_hour = f"{break_end_hour:02d}"
+					break_end_min= f"{break_end_min:02d}"
+
+					# print([end_hour, end_min, start_hour2, start_min2])
+					# print([break_start_hour, break_start_min, break_end_hour, break_end_min])
+
+					lines += f"""
+BEGIN:VEVENT
+DTSTART;TZID=Asia/Hong_Kong:{year}{month}{day}T{break_start_hour}{break_start_min}00
+RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL={school_end}T000000Z
+DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T{break_end_hour}{break_end_min}00
+SUMMARY:Break
+END:VEVENT
+"""
+
+			elif teacher == teacher2 and lesson == lesson2:
 				end_hour = end_hour2
 				end_min = end_min2
 				skip = True
