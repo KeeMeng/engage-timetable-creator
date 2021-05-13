@@ -77,10 +77,6 @@ END:VEVENT
 		count = 0
 		skip = False
 		while count < len(data)-1:
-			if skip:
-				skip = False
-				count += 1
-				continue
 			(lesson, start_hour, start_min, end_hour, end_min, location, teacher) = data[count]
 			(lesson2, start_hour2, start_min2, end_hour2, end_min2, _, teacher2) = data[count+1]
 
@@ -88,8 +84,6 @@ END:VEVENT
 				time_diff = (int(start_hour2) * 60 + int(start_min2)) - (int(end_hour) * 60 + int(end_min)) 
 				if time_diff > 5 and time_diff < 180:
 					# print(time_diff)
-					# diff_hour = time_diff // 60
-					# diff_min = time_diff - (diff_hour * 60)
 					break_start_hour = int(end_hour)
 					break_start_min = int(end_min) + 5
 					if break_start_min > 60:
@@ -117,8 +111,13 @@ DTEND;TZID=Asia/Hong_Kong:{year}{month}{day}T{break_end_hour}{break_end_min}00
 SUMMARY:Break
 END:VEVENT
 """
+			
+			if skip:
+				skip = False
+				count += 1
+				continue
 
-			elif teacher == teacher2 and lesson == lesson2:
+			if (teacher == teacher2 or (lesson == "Study Period" and lesson2 == "Study Period")) and lesson == lesson2:
 				end_hour = end_hour2
 				end_min = end_min2
 				skip = True
